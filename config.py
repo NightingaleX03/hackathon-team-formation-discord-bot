@@ -12,10 +12,9 @@ load_dotenv()
 BOT_TOKEN = os.getenv("DISCORD_TOKEN")
 BOT_STATUS = "for hackathon teams! 🚀"
 
-# Admin user IDs (add your Discord user ID here)
+# Admin user IDs 
 ADMIN_USER_IDS = [
-    # Add your Discord user ID here for admin access
-    # "123456789012345678"  # Example: Replace with your actual Discord user ID
+   
 ]
 
 # Embed colors for different types of messages

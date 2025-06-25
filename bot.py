@@ -29,58 +29,50 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 
-bot = discord.Client(intents=intents)
-tree = app_commands.CommandTree(bot)
+bot = discord.Bot(intents=intents)
 
 # Register slash commands - keeping it clean and simple
-@tree.command(name="create-profile", description="Create your developer profile")
+@bot.slash_command(name="create-profile", description="Create your developer profile")
 async def create_profile_command(interaction: discord.Interaction):
     await create_profile(interaction)
 
-@tree.command(name="update-profile", description="Update your existing profile")
+@bot.slash_command(name="update-profile", description="Update your existing profile")
 async def update_profile_command(interaction: discord.Interaction):
     await update_profile(interaction)
 
-@tree.command(name="view-profile", description="View your current profile")
+@bot.slash_command(name="view-profile", description="View your current profile")
 async def view_profile_command(interaction: discord.Interaction):
     await view_profile(interaction)
 
-@tree.command(name="add-hackathon", description="Add a new hackathon (Admin only)")
+@bot.slash_command(name="add-hackathon", description="Add a new hackathon (Admin only)")
 async def add_hackathon_command(interaction: discord.Interaction):
     await add_hackathon(interaction)
 
-@tree.command(name="list-hackathons", description="List all available hackathons")
+@bot.slash_command(name="list-hackathons", description="List all available hackathons")
 async def list_hackathons_command(interaction: discord.Interaction):
     await list_hackathons(interaction)
 
-@tree.command(name="remove-hackathon", description="Remove a hackathon (Admin only)")
-@app_commands.describe(hackathon_id="The ID of the hackathon to remove")
+@bot.slash_command(name="remove-hackathon", description="Remove a hackathon (Admin only)")
 async def remove_hackathon_command(interaction: discord.Interaction, hackathon_id: int):
     await remove_hackathon(interaction, hackathon_id)
 
-@tree.command(name="find-team", description="Find team members for a hackathon")
+@bot.slash_command(name="find-team", description="Find team members for a hackathon")
 async def find_team_command(interaction: discord.Interaction):
     await find_team(interaction)
 
-@tree.command(name="pick-hackathon", description="Pick a hackathon and find team members")
-@app_commands.describe(
-    hackathon_id="The ID of the hackathon",
-    looking_for="What type of developer you're looking for"
-)
+@bot.slash_command(name="pick-hackathon", description="Pick a hackathon and find team members")
 async def pick_hackathon_command(interaction: discord.Interaction, hackathon_id: int, looking_for: str):
     await pick_hackathon(interaction, hackathon_id, looking_for)
 
-@tree.command(name="remove-from-hackathon", description="Remove yourself from a hackathon")
-@app_commands.describe(hackathon_id="The ID of the hackathon to leave")
+@bot.slash_command(name="remove-from-hackathon", description="Remove yourself from a hackathon")
 async def remove_from_hackathon_command(interaction: discord.Interaction, hackathon_id: int):
     await remove_from_hackathon(interaction, hackathon_id)
 
-@tree.command(name="hackathon-teams", description="View all participants in a hackathon")
-@app_commands.describe(hackathon_id="The ID of the hackathon")
+@bot.slash_command(name="hackathon-teams", description="View all participants in a hackathon")
 async def hackathon_teams_command(interaction: discord.Interaction, hackathon_id: int):
     await hackathon_teams(interaction, hackathon_id)
 
-@tree.command(name="stats", description="View bot statistics")
+@bot.slash_command(name="stats", description="View bot statistics")
 async def stats_command(interaction: discord.Interaction):
     await stats(interaction)
 
@@ -94,8 +86,6 @@ async def on_ready():
     activity = discord.Activity(type=discord.ActivityType.watching, name=BOT_STATUS)
     await bot.change_presence(activity=activity)
     
-    # Sync commands
-    await tree.sync()
     print("✅ Commands synced!")
 
 # Run the bot - the main entry point

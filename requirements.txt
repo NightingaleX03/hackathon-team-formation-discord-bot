@@ -1,2 +1,2 @@
-disnake==2.9.1
+discord.py==2.3.2
 python-dotenv==1.0.0 

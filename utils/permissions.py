@@ -2,10 +2,10 @@
 Permission utilities for the Hackathon Team Finder Discord Bot
 """
 
-import disnake
+import discord
 from config import ADMIN_USER_IDS
 
-def is_admin(user: disnake.Member) -> bool:
+def is_admin(user: discord.Member) -> bool:
     """Check if user has admin permissions"""
     # Check if user is in admin list
     if str(user.id) in ADMIN_USER_IDS:
@@ -16,7 +16,7 @@ def is_admin(user: disnake.Member) -> bool:
         return True
     
     # Check for specific admin role
-    admin_role = disnake.utils.get(user.guild.roles, name="Hackathon Admin")
+    admin_role = discord.utils.get(user.guild.roles, name="Hackathon Admin")
     if admin_role and admin_role in user.roles:
         return True
     

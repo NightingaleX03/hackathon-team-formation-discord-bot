@@ -2,7 +2,7 @@
 Hackathon-related commands for the Hackathon Team Finder Discord Bot
 """
 
-import disnake
+import discord
 from datetime import datetime
 from modals.hackathon_modal import HackathonModal
 from utils.data_manager import load_data, load_hackathons, save_hackathons
@@ -11,7 +11,7 @@ from utils.matching import find_compatible_teammates
 from config import EMBED_COLORS, USER_ROLES
 import json
 
-async def add_hackathon(interaction: disnake.ApplicationCommandInteraction):
+async def add_hackathon(interaction: discord.Interaction):
     """Add a new hackathon - admin only, opens the hackathon creation form"""
     if not is_admin(interaction.user):
         await interaction.response.send_message("❌ You need admin permissions to add hackathons.", ephemeral=True)
@@ -20,7 +20,7 @@ async def add_hackathon(interaction: disnake.ApplicationCommandInteraction):
     modal = HackathonModal()
     await interaction.response.send_modal(modal)
 
-async def list_hackathons(interaction: disnake.ApplicationCommandInteraction):
+async def list_hackathons(interaction: discord.Interaction):
     """List all available hackathons - show them in a nice embed"""
     try:
         with open("example_hackathons.json", "r") as f:
@@ -34,7 +34,7 @@ async def list_hackathons(interaction: disnake.ApplicationCommandInteraction):
         return
     
     # Build the hackathon list embed
-    embed = disnake.Embed(
+    embed = discord.Embed(
         title="🏆 Available Hackathons",
         color=EMBED_COLORS["success"]
     )
@@ -48,7 +48,7 @@ async def list_hackathons(interaction: disnake.ApplicationCommandInteraction):
     
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
-async def remove_hackathon(interaction: disnake.ApplicationCommandInteraction, hackathon_id: int):
+async def remove_hackathon(interaction: discord.Interaction, hackathon_id: int):
     """Remove a hackathon - admin only"""
     if not is_admin(interaction.user):
         await interaction.response.send_message("❌ You need admin permissions to remove hackathons.", ephemeral=True)
@@ -69,7 +69,7 @@ async def remove_hackathon(interaction: disnake.ApplicationCommandInteraction, h
     
     await interaction.response.send_message(f"✅ Hackathon #{hackathon_id} has been removed.", ephemeral=True)
 
-async def find_team(interaction: disnake.ApplicationCommandInteraction):
+async def find_team(interaction: discord.Interaction):
     """Find team members for a hackathon - show compatible users"""
     user_id = str(interaction.user.id)
     data = load_data()
@@ -86,7 +86,7 @@ async def find_team(interaction: disnake.ApplicationCommandInteraction):
         return
     
     # Build the team finder embed
-    embed = disnake.Embed(
+    embed = discord.Embed(
         title="🤝 Compatible Team Members",
         description="Here are users who might be good teammates:",
         color=EMBED_COLORS["success"]
@@ -102,7 +102,7 @@ async def find_team(interaction: disnake.ApplicationCommandInteraction):
     
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
-async def pick_hackathon(interaction: disnake.ApplicationCommandInteraction, hackathon_id: int, looking_for: str):
+async def pick_hackathon(interaction: discord.Interaction, hackathon_id: int, looking_for: str):
     """Pick a hackathon and find team members for it"""
     user_id = str(interaction.user.id)
     data = load_data()
@@ -141,7 +141,7 @@ async def pick_hackathon(interaction: disnake.ApplicationCommandInteraction, hac
     compatible_users = find_compatible_teammates(user_profile, data)
     
     # Build the response embed
-    embed = disnake.Embed(
+    embed = discord.Embed(
         title=f"🎯 {hackathon['name']} - Team Search",
         description=f"You're looking for: **{looking_for}**",
         color=EMBED_COLORS["success"]
@@ -163,7 +163,7 @@ async def pick_hackathon(interaction: disnake.ApplicationCommandInteraction, hac
     
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
-async def remove_from_hackathon(interaction: disnake.ApplicationCommandInteraction, hackathon_id: int):
+async def remove_from_hackathon(interaction: discord.Interaction, hackathon_id: int):
     """Remove user from a hackathon"""
     user_id = str(interaction.user.id)
     
@@ -191,7 +191,7 @@ async def remove_from_hackathon(interaction: disnake.ApplicationCommandInteracti
     else:
         await interaction.response.send_message(f"❌ You're not participating in {hackathon['name']}.", ephemeral=True)
 
-async def hackathon_teams(interaction: disnake.ApplicationCommandInteraction, hackathon_id: int):
+async def hackathon_teams(interaction: discord.Interaction, hackathon_id: int):
     """View all participants in a hackathon"""
     try:
         with open("example_hackathons.json", "r") as f:
@@ -210,7 +210,7 @@ async def hackathon_teams(interaction: disnake.ApplicationCommandInteraction, ha
     data = load_data()
     
     # Build the teams embed
-    embed = disnake.Embed(
+    embed = discord.Embed(
         title=f"👥 {hackathon['name']} - Participants",
         color=EMBED_COLORS["info"]
     )

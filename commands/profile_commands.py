@@ -2,17 +2,17 @@
 Profile-related commands for the Hackathon Team Finder Discord Bot
 """
 
-import discord
+import nextcord
 from modals.user_profile_modal import UserProfileModal
 from utils.data_manager import load_data
 from config import EMBED_COLORS
 
-async def create_profile(interaction: discord.Interaction):
+async def create_profile(interaction: nextcord.Interaction):
     """Create a new user profile - opens the profile creation form"""
     modal = UserProfileModal()
     await interaction.response.send_modal(modal)
 
-async def update_profile(interaction: discord.Interaction):
+async def update_profile(interaction: nextcord.Interaction):
     """Update existing user profile - check if profile exists first"""
     user_id = str(interaction.user.id)
     data = load_data()
@@ -24,7 +24,7 @@ async def update_profile(interaction: discord.Interaction):
     modal = UserProfileModal(is_update=True)
     await interaction.response.send_modal(modal)
 
-async def view_profile(interaction: discord.Interaction):
+async def view_profile(interaction: nextcord.Interaction):
     """View user profile - show all the profile details in a nice embed"""
     user_id = str(interaction.user.id)
     data = load_data()
@@ -36,7 +36,7 @@ async def view_profile(interaction: discord.Interaction):
     profile = data[user_id]
     
     # Build the profile display embed - show all the important info
-    embed = discord.Embed(
+    embed = nextcord.Embed(
         title=f"👤 {profile['username']}'s Profile",
         color=EMBED_COLORS["info"]
     )

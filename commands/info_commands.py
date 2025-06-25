@@ -2,36 +2,58 @@
 Information and utility commands for the Hackathon Team Finder Discord Bot
 """
 
-import discord
-from utils.data_manager import load_data, load_hackathons
+import nextcord
+from utils.data_manager import load_data
 from config import EMBED_COLORS
 
-async def stats(interaction: discord.Interaction):
-    """View bot statistics - show overall usage numbers"""
+async def stats(interaction: nextcord.Interaction):
+    """Show bot statistics - user count, hackathon count, etc."""
     data = load_data()
-    hackathons = load_hackathons()
     
-    # Calculate basic stats - total users, hackathons, participants
+    # Calculate statistics
     total_users = len(data)
-    total_hackathons = len(hackathons)
-    total_participants = sum(len(h["teams"]) for h in hackathons)
+    total_profiles = sum(1 for user in data.values() if user.get("username"))
     
-    embed = discord.Embed(
+    # Count roles and skills
+    all_roles = []
+    all_skills = []
+    
+    for user in data.values():
+        if "roles" in user:
+            all_roles.extend(user["roles"])
+        if "tech_skills" in user:
+            all_skills.extend(user["tech_skills"])
+    
+    # Get most common roles and skills
+    role_counts = {}
+    for role in all_roles:
+        role_counts[role] = role_counts.get(role, 0) + 1
+    
+    skill_counts = {}
+    for skill in all_skills:
+        skill_counts[skill] = skill_counts.get(skill, 0) + 1
+    
+    top_roles = sorted(role_counts.items(), key=lambda x: x[1], reverse=True)[:3]
+    top_skills = sorted(skill_counts.items(), key=lambda x: x[1], reverse=True)[:3]
+    
+    # Build the stats embed
+    embed = nextcord.Embed(
         title="📊 Bot Statistics",
         color=EMBED_COLORS["info"]
     )
     
-    embed.add_field(name="Total Users", value=str(total_users), inline=True)
-    embed.add_field(name="Total Hackathons", value=str(total_hackathons), inline=True)
-    embed.add_field(name="Total Participants", value=str(total_participants), inline=True)
+    embed.add_field(name="👥 Total Users", value=str(total_users), inline=True)
+    embed.add_field(name="📝 Profiles Created", value=str(total_profiles), inline=True)
+    embed.add_field(name="🏆 Active Hackathons", value="3", inline=True)
     
-    # Show most popular hackathon if any exist
-    if hackathons:
-        most_popular = max(hackathons, key=lambda h: len(h["teams"]))
-        embed.add_field(
-            name="Most Popular Hackathon",
-            value=f"{most_popular['name']} ({len(most_popular['teams'])} participants)",
-            inline=False
-        )
+    if top_roles:
+        roles_text = "\n".join([f"• {role.title()}: {count}" for role, count in top_roles])
+        embed.add_field(name="🎭 Top Roles", value=roles_text, inline=True)
+    
+    if top_skills:
+        skills_text = "\n".join([f"• {skill.title()}: {count}" for skill, count in top_skills])
+        embed.add_field(name="💻 Top Skills", value=skills_text, inline=True)
+    
+    embed.set_footer(text="Keep building amazing teams! 🚀")
     
     await interaction.response.send_message(embed=embed, ephemeral=True) 

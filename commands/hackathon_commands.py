@@ -2,15 +2,16 @@
 Hackathon-related commands for the Hackathon Team Finder Discord Bot
 """
 
-import discord
+import nextcord
 from datetime import datetime
 from modals.hackathon_modal import HackathonModal
 from utils.data_manager import load_data, load_hackathons, save_hackathons
 from utils.permissions import is_admin
 from utils.matching import find_team_matches, format_matches
 from config import EMBED_COLORS, USER_ROLES
+import json
 
-async def add_hackathon(interaction: discord.Interaction):
+async def add_hackathon(interaction: nextcord.Interaction):
     """Add a new hackathon (admin only) - opens the hackathon creation form"""
     if not is_admin(interaction.user):
         await interaction.response.send_message("❌ Only administrators can add hackathons.", ephemeral=True)
@@ -19,15 +20,20 @@ async def add_hackathon(interaction: discord.Interaction):
     modal = HackathonModal()
     await interaction.response.send_modal(modal)
 
-async def list_hackathons(interaction: discord.Interaction):
+async def list_hackathons(interaction: nextcord.Interaction):
     """List all hackathons - show available hackathons with participant counts"""
-    hackathons = load_hackathons()
-    
-    if not hackathons:
-        await interaction.response.send_message("❌ No hackathons available yet.", ephemeral=True)
+    try:
+        with open("example_hackathons.json", "r") as f:
+            hackathons = json.load(f)
+    except FileNotFoundError:
+        await interaction.response.send_message("❌ No hackathons found.", ephemeral=True)
         return
     
-    embed = discord.Embed(
+    if not hackathons:
+        await interaction.response.send_message("❌ No hackathons available.", ephemeral=True)
+        return
+    
+    embed = nextcord.Embed(
         title="🏆 Available Hackathons",
         color=EMBED_COLORS["hackathon"]
     )
@@ -35,39 +41,35 @@ async def list_hackathons(interaction: discord.Interaction):
     for hackathon in hackathons:
         team_count = len(hackathon["teams"])
         embed.add_field(
-            name=f"{hackathon['id']}. {hackathon['name']}",
-            value=f"📅 {hackathon['date']}\n📝 {hackathon['description']}\n👥 {team_count} participants",
+            name=f"#{hackathon['id']} - {hackathon['name']}",
+            value=f"📅 {hackathon['date']}\n📍 {hackathon['location']}\n💰 {hackathon['prize']}\n📝 {hackathon['description'][:100]}...",
             inline=False
         )
     
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
-async def remove_hackathon(interaction: discord.Interaction, hackathon_id: int):
+async def remove_hackathon(interaction: nextcord.Interaction, hackathon_id: int):
     """Remove a hackathon (admin only) - delete from the list"""
     if not is_admin(interaction.user):
         await interaction.response.send_message("❌ Only administrators can remove hackathons.", ephemeral=True)
         return
     
-    hackathons = load_hackathons()
-    hackathon = next((h for h in hackathons if h["id"] == hackathon_id), None)
-    
-    if not hackathon:
-        await interaction.response.send_message("❌ Hackathon not found.", ephemeral=True)
+    try:
+        with open("example_hackathons.json", "r") as f:
+            hackathons = json.load(f)
+    except FileNotFoundError:
+        await interaction.response.send_message("❌ No hackathons found.", ephemeral=True)
         return
     
-    # Remove the hackathon - filter it out
+    # Find and remove the hackathon
     hackathons = [h for h in hackathons if h["id"] != hackathon_id]
-    save_hackathons(hackathons)
     
-    embed = discord.Embed(
-        title="✅ Hackathon Removed",
-        description=f"**{hackathon['name']}** has been removed.",
-        color=EMBED_COLORS["success"]
-    )
+    with open("example_hackathons.json", "w") as f:
+        json.dump(hackathons, f, indent=2)
     
-    await interaction.response.send_message(embed=embed, ephemeral=True)
+    await interaction.response.send_message(f"✅ Hackathon #{hackathon_id} has been removed.", ephemeral=True)
 
-async def find_team(interaction: discord.Interaction):
+async def find_team(interaction: nextcord.Interaction):
     """Find team members for a hackathon - show available hackathons first"""
     user_id = str(interaction.user.id)
     data = load_data()
@@ -83,7 +85,7 @@ async def find_team(interaction: discord.Interaction):
         return
     
     # Create hackathon selection embed - let user pick which hackathon
-    embed = discord.Embed(
+    embed = nextcord.Embed(
         title="🏆 Select a Hackathon",
         description="Choose a hackathon to find team members:",
         color=EMBED_COLORS["hackathon"]
@@ -92,8 +94,8 @@ async def find_team(interaction: discord.Interaction):
     for hackathon in hackathons:
         team_count = len(hackathon["teams"])
         embed.add_field(
-            name=f"{hackathon['id']}. {hackathon['name']}",
-            value=f"📅 {hackathon['date']}\n👥 {team_count} participants",
+            name=f"#{hackathon['id']} - {hackathon['name']}",
+            value=f"📅 {hackathon['date']}\n📍 {hackathon['location']}\n💰 {hackathon['prize']}\n📝 {hackathon['description'][:100]}...",
             inline=True
         )
     
@@ -105,7 +107,7 @@ async def find_team(interaction: discord.Interaction):
     
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
-async def pick_hackathon(interaction: discord.Interaction, hackathon_id: int, looking_for: str):
+async def pick_hackathon(interaction: nextcord.Interaction, hackathon_id: int, looking_for: str):
     """Pick a hackathon and find team members - the main team-finding logic"""
     user_id = str(interaction.user.id)
     data = load_data()
@@ -137,7 +139,7 @@ async def pick_hackathon(interaction: discord.Interaction, hackathon_id: int, lo
     matches = find_team_matches(user_id, hackathon_id, looking_for, data)
     
     # Create response - show matches and ping users
-    embed = discord.Embed(
+    embed = nextcord.Embed(
         title=f"🤝 Team Matches for {hackathon['name']}",
         description=f"Looking for: **{looking_for}**",
         color=EMBED_COLORS["match"]
@@ -172,7 +174,7 @@ async def pick_hackathon(interaction: discord.Interaction, hackathon_id: int, lo
     
     await interaction.response.send_message(embed=embed)
 
-async def remove_from_hackathon(interaction: discord.Interaction, hackathon_id: int):
+async def remove_from_hackathon(interaction: nextcord.Interaction, hackathon_id: int):
     """Remove user from a hackathon - when team is formed"""
     user_id = str(interaction.user.id)
     hackathons = load_hackathons()
@@ -186,7 +188,7 @@ async def remove_from_hackathon(interaction: discord.Interaction, hackathon_id: 
     hackathon["teams"] = [team for team in hackathon["teams"] if team["user_id"] != user_id]
     save_hackathons(hackathons)
     
-    embed = discord.Embed(
+    embed = nextcord.Embed(
         title="✅ Removed from Hackathon",
         description=f"You have been removed from **{hackathon['name']}**.",
         color=EMBED_COLORS["success"]
@@ -194,7 +196,7 @@ async def remove_from_hackathon(interaction: discord.Interaction, hackathon_id: 
     
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
-async def hackathon_teams(interaction: discord.Interaction, hackathon_id: int):
+async def hackathon_teams(interaction: nextcord.Interaction, hackathon_id: int):
     """View all participants in a hackathon - see who's joined"""
     hackathons = load_hackathons()
     hackathon = next((h for h in hackathons if h["id"] == hackathon_id), None)
@@ -205,7 +207,7 @@ async def hackathon_teams(interaction: discord.Interaction, hackathon_id: int):
     
     data = load_data()
     
-    embed = discord.Embed(
+    embed = nextcord.Embed(
         title=f"👥 Participants in {hackathon['name']}",
         description=f"Total participants: {len(hackathon['teams'])}",
         color=EMBED_COLORS["hackathon"]

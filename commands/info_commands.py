@@ -2,11 +2,11 @@
 Information and utility commands for the Hackathon Team Finder Discord Bot
 """
 
-import nextcord
+import disnake
 from utils.data_manager import load_data
 from config import EMBED_COLORS
 
-async def stats(interaction: nextcord.Interaction):
+async def stats(interaction: disnake.ApplicationCommandInteraction):
     """Show bot statistics - user count, hackathon count, etc."""
     data = load_data()
     
@@ -37,7 +37,7 @@ async def stats(interaction: nextcord.Interaction):
     top_skills = sorted(skill_counts.items(), key=lambda x: x[1], reverse=True)[:3]
     
     # Build the stats embed
-    embed = nextcord.Embed(
+    embed = disnake.Embed(
         title="📊 Bot Statistics",
         color=EMBED_COLORS["info"]
     )

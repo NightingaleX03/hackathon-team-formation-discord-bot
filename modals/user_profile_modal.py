@@ -2,8 +2,8 @@
 User Profile Modal for creating and updating user profiles
 """
 
-import nextcord
-from nextcord.ui import Modal, TextInput, Select
+import disnake
+from disnake.ui import Modal, TextInput, Select
 from utils.data_manager import load_data, save_data
 from config import USER_ROLES, TECH_SKILLS, EXPERIENCE_LEVELS, TIMEZONES
 from datetime import datetime
@@ -60,7 +60,7 @@ class UserProfileModal(Modal):
         self.add_item(self.timezone)
         self.add_item(self.tech_skills)
     
-    async def callback(self, interaction: nextcord.Interaction):
+    async def callback(self, interaction: disnake.ModalInteraction):
         """Handle the form submission"""
         user_id = str(interaction.user.id)
         data = load_data()
@@ -94,7 +94,7 @@ class UserProfileModal(Modal):
         save_data(data)
         
         # Create success embed
-        embed = nextcord.Embed(
+        embed = disnake.Embed(
             title="✅ Profile Saved Successfully!",
             color=0x00ff00
         )

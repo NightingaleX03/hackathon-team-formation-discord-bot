@@ -2,8 +2,8 @@
 Hackathon Modal for creating new hackathons
 """
 
-import nextcord
-from nextcord.ui import Modal, TextInput
+import disnake
+from disnake.ui import Modal, TextInput
 from utils.data_manager import load_data
 import json
 from datetime import datetime
@@ -50,7 +50,7 @@ class HackathonModal(Modal):
             placeholder="Brief description of the hackathon...",
             required=True,
             max_length=500,
-            style=nextcord.TextInputStyle.paragraph
+            style=disnake.TextInputStyle.paragraph
         )
         
         # Add all fields to the modal
@@ -60,7 +60,7 @@ class HackathonModal(Modal):
         self.add_item(self.prize)
         self.add_item(self.description)
     
-    async def callback(self, interaction: nextcord.Interaction):
+    async def callback(self, interaction: disnake.ModalInteraction):
         """Handle the form submission"""
         # Load existing hackathons
         try:
@@ -93,7 +93,7 @@ class HackathonModal(Modal):
             json.dump(hackathons, f, indent=2)
         
         # Create success embed
-        embed = nextcord.Embed(
+        embed = disnake.Embed(
             title="✅ Hackathon Added Successfully!",
             color=0x00ff00
         )

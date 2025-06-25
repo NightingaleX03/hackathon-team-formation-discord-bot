@@ -7,4 +7,5 @@ services:
     envVars:
       - key: DISCORD_TOKEN
         sync: false
-    plan: free 
+    plan: free
+    pythonVersion: "3.11.9" 

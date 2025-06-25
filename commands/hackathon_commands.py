@@ -10,21 +10,21 @@ from utils.permissions import is_admin
 from utils.matching import find_team_matches, format_matches
 from config import EMBED_COLORS, USER_ROLES
 
-async def add_hackathon(ctx: discord.ApplicationContext):
+async def add_hackathon(interaction: discord.Interaction):
     """Add a new hackathon (admin only) - opens the hackathon creation form"""
-    if not is_admin(ctx.author):
-        await ctx.respond("❌ Only administrators can add hackathons.", ephemeral=True)
+    if not is_admin(interaction.user):
+        await interaction.response.send_message("❌ Only administrators can add hackathons.", ephemeral=True)
         return
     
     modal = HackathonModal()
-    await ctx.send_modal(modal)
+    await interaction.response.send_modal(modal)
 
-async def list_hackathons(ctx: discord.ApplicationContext):
+async def list_hackathons(interaction: discord.Interaction):
     """List all hackathons - show available hackathons with participant counts"""
     hackathons = load_hackathons()
     
     if not hackathons:
-        await ctx.respond("❌ No hackathons available yet.", ephemeral=True)
+        await interaction.response.send_message("❌ No hackathons available yet.", ephemeral=True)
         return
     
     embed = discord.Embed(
@@ -40,19 +40,19 @@ async def list_hackathons(ctx: discord.ApplicationContext):
             inline=False
         )
     
-    await ctx.respond(embed=embed, ephemeral=True)
+    await interaction.response.send_message(embed=embed, ephemeral=True)
 
-async def remove_hackathon(ctx: discord.ApplicationContext, hackathon_id: int):
+async def remove_hackathon(interaction: discord.Interaction, hackathon_id: int):
     """Remove a hackathon (admin only) - delete from the list"""
-    if not is_admin(ctx.author):
-        await ctx.respond("❌ Only administrators can remove hackathons.", ephemeral=True)
+    if not is_admin(interaction.user):
+        await interaction.response.send_message("❌ Only administrators can remove hackathons.", ephemeral=True)
         return
     
     hackathons = load_hackathons()
     hackathon = next((h for h in hackathons if h["id"] == hackathon_id), None)
     
     if not hackathon:
-        await ctx.respond("❌ Hackathon not found.", ephemeral=True)
+        await interaction.response.send_message("❌ Hackathon not found.", ephemeral=True)
         return
     
     # Remove the hackathon - filter it out
@@ -65,21 +65,21 @@ async def remove_hackathon(ctx: discord.ApplicationContext, hackathon_id: int):
         color=EMBED_COLORS["success"]
     )
     
-    await ctx.respond(embed=embed, ephemeral=True)
+    await interaction.response.send_message(embed=embed, ephemeral=True)
 
-async def find_team(ctx: discord.ApplicationContext):
+async def find_team(interaction: discord.Interaction):
     """Find team members for a hackathon - show available hackathons first"""
-    user_id = str(ctx.author.id)
+    user_id = str(interaction.user.id)
     data = load_data()
     
     if user_id not in data:
-        await ctx.respond("❌ You need to create a profile first. Use `/create-profile`.", ephemeral=True)
+        await interaction.response.send_message("❌ You need to create a profile first. Use `/create-profile`.", ephemeral=True)
         return
     
     hackathons = load_hackathons()
     
     if not hackathons:
-        await ctx.respond("❌ No hackathons available yet.", ephemeral=True)
+        await interaction.response.send_message("❌ No hackathons available yet.", ephemeral=True)
         return
     
     # Create hackathon selection embed - let user pick which hackathon
@@ -103,22 +103,22 @@ async def find_team(ctx: discord.ApplicationContext):
         inline=False
     )
     
-    await ctx.respond(embed=embed, ephemeral=True)
+    await interaction.response.send_message(embed=embed, ephemeral=True)
 
-async def pick_hackathon(ctx: discord.ApplicationContext, hackathon_id: int, looking_for: str):
+async def pick_hackathon(interaction: discord.Interaction, hackathon_id: int, looking_for: str):
     """Pick a hackathon and find team members - the main team-finding logic"""
-    user_id = str(ctx.author.id)
+    user_id = str(interaction.user.id)
     data = load_data()
     
     if user_id not in data:
-        await ctx.respond("❌ You need to create a profile first. Use `/create-profile`.", ephemeral=True)
+        await interaction.response.send_message("❌ You need to create a profile first. Use `/create-profile`.", ephemeral=True)
         return
     
     hackathons = load_hackathons()
     hackathon = next((h for h in hackathons if h["id"] == hackathon_id), None)
     
     if not hackathon:
-        await ctx.respond("❌ Hackathon not found. Use `/list-hackathons` to see available hackathons.", ephemeral=True)
+        await interaction.response.send_message("❌ Hackathon not found. Use `/list-hackathons` to see available hackathons.", ephemeral=True)
         return
     
     # Check if user is already in this hackathon - don't add duplicates
@@ -128,7 +128,7 @@ async def pick_hackathon(ctx: discord.ApplicationContext, hackathon_id: int, loo
         # Add user to hackathon - join the participant list
         hackathon["teams"].append({
             "user_id": user_id,
-            "username": ctx.author.display_name,
+            "username": interaction.user.display_name,
             "joined_at": datetime.now().isoformat()
         })
         save_hackathons(hackathons)
@@ -170,16 +170,16 @@ async def pick_hackathon(ctx: discord.ApplicationContext, hackathon_id: int, loo
         inline=False
     )
     
-    await ctx.respond(embed=embed)
+    await interaction.response.send_message(embed=embed)
 
-async def remove_from_hackathon(ctx: discord.ApplicationContext, hackathon_id: int):
+async def remove_from_hackathon(interaction: discord.Interaction, hackathon_id: int):
     """Remove user from a hackathon - when team is formed"""
-    user_id = str(ctx.author.id)
+    user_id = str(interaction.user.id)
     hackathons = load_hackathons()
     
     hackathon = next((h for h in hackathons if h["id"] == hackathon_id), None)
     if not hackathon:
-        await ctx.respond("❌ Hackathon not found.", ephemeral=True)
+        await interaction.response.send_message("❌ Hackathon not found.", ephemeral=True)
         return
     
     # Remove user from hackathon - filter them out
@@ -192,15 +192,15 @@ async def remove_from_hackathon(ctx: discord.ApplicationContext, hackathon_id: i
         color=EMBED_COLORS["success"]
     )
     
-    await ctx.respond(embed=embed, ephemeral=True)
+    await interaction.response.send_message(embed=embed, ephemeral=True)
 
-async def hackathon_teams(ctx: discord.ApplicationContext, hackathon_id: int):
+async def hackathon_teams(interaction: discord.Interaction, hackathon_id: int):
     """View all participants in a hackathon - see who's joined"""
     hackathons = load_hackathons()
     hackathon = next((h for h in hackathons if h["id"] == hackathon_id), None)
     
     if not hackathon:
-        await ctx.respond("❌ Hackathon not found.", ephemeral=True)
+        await interaction.response.send_message("❌ Hackathon not found.", ephemeral=True)
         return
     
     data = load_data()
@@ -231,4 +231,4 @@ async def hackathon_teams(ctx: discord.ApplicationContext, hackathon_id: int):
     else:
         embed.add_field(name="No Participants", value="No one has joined this hackathon yet.", inline=False)
     
-    await ctx.respond(embed=embed, ephemeral=True) 
+    await interaction.response.send_message(embed=embed, ephemeral=True) 

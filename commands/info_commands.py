@@ -6,7 +6,7 @@ import discord
 from utils.data_manager import load_data, load_hackathons
 from config import EMBED_COLORS
 
-async def stats(ctx: discord.ApplicationContext):
+async def stats(interaction: discord.Interaction):
     """View bot statistics - show overall usage numbers"""
     data = load_data()
     hackathons = load_hackathons()
@@ -34,4 +34,4 @@ async def stats(ctx: discord.ApplicationContext):
             inline=False
         )
     
-    await ctx.respond(embed=embed, ephemeral=True) 
+    await interaction.response.send_message(embed=embed, ephemeral=True) 

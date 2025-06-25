@@ -7,30 +7,30 @@ from modals.user_profile_modal import UserProfileModal
 from utils.data_manager import load_data
 from config import EMBED_COLORS
 
-async def create_profile(ctx: discord.ApplicationContext):
+async def create_profile(interaction: discord.Interaction):
     """Create a new user profile - opens the profile creation form"""
     modal = UserProfileModal()
-    await ctx.send_modal(modal)
+    await interaction.response.send_modal(modal)
 
-async def update_profile(ctx: discord.ApplicationContext):
+async def update_profile(interaction: discord.Interaction):
     """Update existing user profile - check if profile exists first"""
-    user_id = str(ctx.author.id)
+    user_id = str(interaction.user.id)
     data = load_data()
     
     if user_id not in data:
-        await ctx.respond("❌ You don't have a profile yet. Use `/create-profile` first.", ephemeral=True)
+        await interaction.response.send_message("❌ You don't have a profile yet. Use `/create-profile` first.", ephemeral=True)
         return
     
     modal = UserProfileModal(is_update=True)
-    await ctx.send_modal(modal)
+    await interaction.response.send_modal(modal)
 
-async def view_profile(ctx: discord.ApplicationContext):
+async def view_profile(interaction: discord.Interaction):
     """View user profile - show all the profile details in a nice embed"""
-    user_id = str(ctx.author.id)
+    user_id = str(interaction.user.id)
     data = load_data()
     
     if user_id not in data:
-        await ctx.respond("❌ You don't have a profile yet. Use `/create-profile` first.", ephemeral=True)
+        await interaction.response.send_message("❌ You don't have a profile yet. Use `/create-profile` first.", ephemeral=True)
         return
     
     profile = data[user_id]
@@ -48,4 +48,4 @@ async def view_profile(ctx: discord.ApplicationContext):
     embed.add_field(name="Created", value=profile["created_at"][:10], inline=True)
     embed.add_field(name="Updated", value=profile["updated_at"][:10], inline=True)
     
-    await ctx.respond(embed=embed, ephemeral=True) 
+    await interaction.response.send_message(embed=embed, ephemeral=True) 

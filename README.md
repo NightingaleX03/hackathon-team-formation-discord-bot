@@ -1,171 +1,250 @@
-# 🤝 Hackathon Team Matcher Discord Bot
+# 🏆 Hackathon Team Finder Discord Bot
 
-A Discord bot that helps hackathon participants find compatible team members based on tech stack, experience level, timezone, and preferred roles.
+A comprehensive Discord bot designed to help developers find team members for hackathons. The bot allows users to create profiles, join hackathons, and find compatible team members based on skills, roles, and preferences.
 
 ## ✨ Features
 
-- **Team Profile Creation**: Users can create detailed profiles with their tech stack, experience, timezone, and preferred role
-- **Smart Matching**: AI-powered matching algorithm that considers:
-  - Tech stack compatibility (+1 point per shared technology)
-  - Timezone overlap (+2 points for matching timezones)
-  - Role complementarity (+3 points for complementary roles like Frontend + Backend)
-- **Slash Commands**: Modern Discord slash command interface
-- **Data Persistence**: JSON-based storage for user profiles
-- **Rich Embeds**: Beautiful Discord embeds for all responses
+### 🎯 Core Functionality
+- **User Profiles**: Create and manage developer profiles with roles, skills, and experience
+- **Hackathon Management**: Admins can add/remove hackathons from the list
+- **Team Matching**: Find compatible team members based on skills and preferences
+- **Smart Matching Algorithm**: Matches users based on timezone, roles, and tech skills
+- **Real-time Notifications**: Ping matched users to facilitate connections
 
-## 🛠️ Commands
+### 👤 User Profile System
+- **Multiple Roles**: Choose from backend, frontend, AI/ML, VR, designer, web developer, game developer
+- **Tech Skills**: Select from 50+ predefined tech skills
+- **Experience Levels**: Beginner, Intermediate, Advanced
+- **Timezone Support**: Specify your timezone for better matching
+- **Profile Updates**: Update your profile anytime
 
-| Command | Description |
-|---------|-------------|
-| `/looking-for-team` | Create or update your team profile |
-| `/reset-team-profile` | Remove your team profile |
-| `/view-profile` | View your current team profile |
-| `/find-matches` | Find compatible team members |
+### 🏆 Hackathon Management
+- **Admin Controls**: Only server admins can add/remove hackathons
+- **Hackathon Details**: Name, description, dates, and participant tracking
+- **Team Formation**: Join hackathons and find team members
+- **Participant Lists**: View all participants in each hackathon
 
-## 🚀 Setup Instructions
+## 🚀 Commands
 
-### 1. Create a Discord Bot
+### User Commands
 
-1. Go to [Discord Developer Portal](https://discord.com/developers/applications)
-2. Click "New Application" and give it a name
-3. Go to the "Bot" section and click "Add Bot"
-4. Copy the bot token (you'll need this later)
-5. Go to "OAuth2" → "URL Generator"
-6. Select scopes: `bot` and `applications.commands`
-7. Select bot permissions:
-   - Send Messages
-   - Use Slash Commands
-   - Read Message History
-   - Send Messages in Threads
-8. Use the generated URL to invite the bot to your server
+#### Profile Management
+- `/create-profile` - Create your developer profile
+- `/update-profile` - Update your existing profile
+- `/view-profile` - View your current profile
 
-### 2. Install Dependencies
+#### Hackathon Participation
+- `/find-team` - Start the team-finding process
+- `/pick-hackathon <id> <looking_for>` - Select a hackathon and specify what you're looking for
+- `/remove-from-hackathon <id>` - Remove yourself from a hackathon
+- `/hackathon-teams <id>` - View all participants in a hackathon
 
-```bash
-pip install -r requirements.txt
+#### Information
+- `/list-hackathons` - View all available hackathons
+- `/stats` - View bot statistics
+
+### Admin Commands
+
+#### Hackathon Management
+- `/add-hackathon` - Add a new hackathon to the list
+- `/remove-hackathon <id>` - Remove a hackathon from the list
+
+## 🎮 How to Use
+
+### 1. Create Your Profile
+```
+/create-profile
+```
+Fill out the form with:
+- **Roles**: Choose from backend, frontend, AI/ML, VR, designer, web developer, game developer
+- **Tech Skills**: Select from 50+ available skills
+- **Experience Level**: Beginner, Intermediate, or Advanced
+- **Timezone**: Your timezone for better matching
+
+### 2. Find Team Members
+```
+/find-team
+```
+This will show you all available hackathons. Then use:
+```
+/pick-hackathon <hackathon_id> <what_you_are_looking_for>
 ```
 
-### 3. Set Environment Variable
-
-Set your Discord bot token as an environment variable:
-
-**Windows (PowerShell):**
-```powershell
-$env:DISCORD_TOKEN="your_bot_token_here"
+**Example:**
+```
+/pick-hackathon 1 frontend
 ```
 
-**Windows (Command Prompt):**
-```cmd
-set DISCORD_TOKEN=your_bot_token_here
-```
+### 3. Get Matched
+The bot will:
+- Add you to the hackathon participant list
+- Find compatible team members based on your criteria
+- Show you the best matches with compatibility scores
+- Ping the matched users so they can connect with you
 
-**Linux/Mac:**
-```bash
-export DISCORD_TOKEN="your_bot_token_here"
-```
+### 4. Form Your Team
+Once you find team members:
+- Connect with them via Discord
+- Use `/remove-from-hackathon <id>` when your team is formed
 
-### 4. Run the Bot
+## 🔧 Setup
 
-```bash
-python bot.py
-```
+### Prerequisites
+- Python 3.8 or higher
+- Discord Bot Token
+- Discord Server with admin permissions
 
-## 📋 Usage Guide
+### Installation
 
-### Creating a Team Profile
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd discord-bot
+   ```
 
-1. Use `/looking-for-team` in any channel
-2. Fill out the form with:
-   - **Tech Stack**: Comma-separated list (e.g., "Python, React, Node.js")
-   - **Experience Level**: Beginner, Intermediate, or Advanced
-   - **Timezone**: Your timezone or UTC offset (e.g., "EST", "UTC-5")
-   - **Preferred Role**: Frontend, Backend, PM, Designer, etc.
-   - **Looking for Team**: Yes or No
+2. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-### Finding Matches
+3. **Create a Discord Bot**
+   - Go to [Discord Developer Portal](https://discord.com/developers/applications)
+   - Create a new application
+   - Go to the "Bot" section
+   - Create a bot and copy the token
 
-- Matches are automatically shown when you create a profile
-- Use `/find-matches` to search for new matches anytime
-- Use `/view-profile` to see your current profile
-- Use `/reset-team-profile` to delete your profile
+4. **Set up environment variables**
+   Create a `.env` file in the project root:
+   ```
+   DISCORD_TOKEN=your_bot_token_here
+   ```
+
+5. **Invite the bot to your server**
+   - Go to OAuth2 > URL Generator
+   - Select "bot" scope
+   - Select required permissions:
+     - Send Messages
+     - Use Slash Commands
+     - Read Message History
+     - Mention Everyone (for pinging matched users)
+   - Use the generated URL to invite the bot
+
+6. **Run the bot**
+   ```bash
+   python bot.py
+   ```
+
+## 📊 Available Roles
+
+Users can select from these roles:
+- **Backend Developer**
+- **Frontend Developer**
+- **AI/ML Engineer**
+- **VR Developer**
+- **Designer**
+- **Web Developer**
+- **Game Developer**
+
+## 🛠️ Tech Skills
+
+The bot includes 50+ predefined tech skills including:
+- **Programming Languages**: Python, JavaScript, TypeScript, Java, C++, C#, Go, Rust
+- **Frameworks**: React, Vue.js, Angular, Node.js, Express, Django, Flask
+- **Databases**: MongoDB, PostgreSQL, MySQL, Redis
+- **Cloud Platforms**: AWS, Azure, GCP
+- **DevOps**: Docker, Kubernetes, Git, CI/CD
+- **AI/ML**: TensorFlow, PyTorch, Scikit-learn, OpenAI API
+- **Game Development**: Unity, Unreal Engine
+- **Design Tools**: Figma, Adobe Creative Suite
+- **And many more...**
 
 ## 🎯 Matching Algorithm
 
-The bot uses a scoring system to find the best matches:
+The bot uses a sophisticated matching algorithm that considers:
 
-- **+2 points** for matching timezone
-- **+3 points** for complementary roles (Frontend + Backend, PM + Developer, etc.)
-- **+1 point** per shared technology in tech stack
+1. **Role Compatibility** (Score: 3-6 points)
+   - Direct role matches get higher scores
+   - Complementary roles (e.g., frontend + backend) get bonus points
 
-Matches are ranked by total score and the top 3 are displayed.
+2. **Timezone Matching** (Score: 2 points)
+   - Users in the same timezone get bonus points
 
-## 📁 Project Structure
+3. **Tech Stack Overlap** (Score: 1 point per shared skill)
+   - Shared technical skills increase compatibility
+
+## 📁 File Structure
 
 ```
 discord-bot/
-├── bot.py              # Main bot code
-├── data.json           # User profiles (created automatically)
-├── requirements.txt    # Python dependencies
-└── README.md          # This file
+├── bot.py                    # Main bot file
+├── config.py                 # Configuration and constants
+├── requirements.txt          # Python dependencies
+├── README.md                # This file
+├── example_data.json        # Example user profiles
+├── example_hackathons.json  # Example hackathon data
+├── utils/                   # Utility functions
+│   ├── __init__.py
+│   ├── data_manager.py      # Data loading/saving utilities
+│   ├── matching.py          # Matching algorithm
+│   └── permissions.py       # Permission checks
+├── modals/                  # Discord UI modals
+│   ├── __init__.py
+│   ├── user_profile_modal.py # User profile creation modal
+│   └── hackathon_modal.py   # Hackathon creation modal
+└── commands/                # Bot commands
+    ├── __init__.py
+    ├── profile_commands.py  # Profile-related commands
+    ├── hackathon_commands.py # Hackathon-related commands
+    └── info_commands.py     # Information and utility commands
 ```
 
-## 🔧 Customization
+## 🏗️ Code Organization
 
-### Adding New Roles
+The bot is organized into logical modules for better maintainability:
 
-To add support for new complementary roles, edit the `complementary_roles` list in the `calculate_compatibility` function:
+### **Utils** (`utils/`)
+- **`data_manager.py`**: Handles all JSON file operations for user data and hackathons
+- **`matching.py`**: Contains the matching algorithm and compatibility scoring
+- **`permissions.py`**: Admin permission checks
 
-```python
-complementary_roles = [
-    ("frontend", "backend"),
-    ("backend", "frontend"),
-    ("pm", "developer"),
-    ("designer", "developer"),
-    ("full-stack", "frontend"),
-    ("full-stack", "backend"),
-    ("your_new_role", "complementary_role")  # Add here
-]
-```
+### **Modals** (`modals/`)
+- **`user_profile_modal.py`**: Discord modal for creating/updating user profiles
+- **`hackathon_modal.py`**: Discord modal for adding new hackathons
 
-### Changing Scoring
+### **Commands** (`commands/`)
+- **`profile_commands.py`**: All profile-related slash commands
+- **`hackathon_commands.py`**: All hackathon-related slash commands
+- **`info_commands.py`**: Information and utility commands
 
-Modify the scoring weights in the `calculate_compatibility` function:
+### **Main Files**
+- **`bot.py`**: Main bot file that imports and registers all commands
+- **`config.py`**: All configuration constants and settings
 
-```python
-# Timezone compatibility
-if profile1["timezone"].lower() == profile2["timezone"].lower():
-    score += 2  # Change this value
+## 🔒 Permissions
 
-# Role compatibility
-score += 3  # Change this value
-
-# Tech stack compatibility
-score += len(shared_tech)  # Change multiplier if needed
-```
-
-## 🐛 Troubleshooting
-
-### Bot Not Responding
-- Check if the bot token is correct
-- Ensure the bot has the required permissions
-- Verify the bot is online in your server
-
-### Commands Not Working
-- Make sure you've invited the bot with the `applications.commands` scope
-- Commands may take up to 1 hour to appear globally
-- Try using `/` to see if commands are available
-
-### Permission Errors
-- Ensure the bot has "Send Messages" permission
-- Check if the bot can read the channel where you're using commands
+- **Admin Commands**: Only server administrators can add/remove hackathons
+- **User Commands**: Any user can create profiles and find teams
+- **Data Privacy**: All data is stored locally in JSON files
 
 ## 🤝 Contributing
 
-Feel free to submit issues and enhancement requests!
+Feel free to contribute to this project by:
+- Reporting bugs
+- Suggesting new features
+- Adding more tech skills or roles
+- Improving the matching algorithm
 
-## 📄 License
+## 📝 License
 
-This project is open source and available under the [MIT License](LICENSE).
+This project is open source and available under the MIT License.
+
+## 🆘 Support
+
+If you encounter any issues or have questions:
+1. Check the bot's help commands
+2. Ensure you have the correct permissions
+3. Verify your Discord bot token is correct
+4. Check that the bot has been invited with the right permissions
 
 ---
 

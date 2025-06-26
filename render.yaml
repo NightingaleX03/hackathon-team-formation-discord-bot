@@ -2,10 +2,12 @@ services:
   - type: web
     name: hackathon-team-finder-bot
     env: python
-    buildCommand: pip install -r requirements.txt
+    buildCommand: |
+      python --version
+      pip install -r requirements.txt
     startCommand: python bot.py
     envVars:
       - key: DISCORD_TOKEN
         sync: false
     plan: free
-    pythonVersion: "3.12.2" 
+    pythonVersion: "3.12" 

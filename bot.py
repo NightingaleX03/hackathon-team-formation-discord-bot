@@ -24,7 +24,7 @@ except Exception as e:
     print("Make sure your .env file exists and has the correct format:")
     print("DISCORD_TOKEN=your_actual_bot_token_here")
 
-# Bot setup - this is where the magic happens
+# Bot setup
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
@@ -32,7 +32,7 @@ intents.members = True
 bot = discord.Client(intents=intents)
 tree = app_commands.CommandTree(bot)
 
-# Register slash commands - keeping it clean and simple
+# Register slash commands 
 @tree.command(name="create-profile", description="Create your developer profile")
 async def create_profile_command(interaction: discord.Interaction):
     await create_profile(interaction)
@@ -90,7 +90,7 @@ async def on_ready():
     print(f"🤖 {bot.user} is ready and online!")
     print(f"📊 Bot is in {len(bot.guilds)} guild(s)")
     
-    # Set bot status - shows what the bot is "doing"
+    # Set bot status
     activity = discord.Activity(type=discord.ActivityType.watching, name=BOT_STATUS)
     await bot.change_presence(activity=activity)
     
@@ -98,7 +98,7 @@ async def on_ready():
     await tree.sync()
     print("✅ Commands synced!")
 
-# Run the bot - the main entry point
+# Run the bot
 if __name__ == "__main__":
     if not BOT_TOKEN:
         print("❌ Error: DISCORD_TOKEN not found in environment variables!")

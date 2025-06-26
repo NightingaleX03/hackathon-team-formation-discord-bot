@@ -8,4 +8,4 @@ services:
       - key: DISCORD_TOKEN
         sync: false
     plan: free
-    pythonVersion: "3.11.9" 
+    pythonVersion: "3.12.3" 

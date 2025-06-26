@@ -42,7 +42,7 @@ async def list_hackathons(interaction: discord.Interaction):
     for hackathon in hackathons:
         embed.add_field(
             name=f"#{hackathon['id']} - {hackathon['name']}",
-            value=f"📅 {hackathon['date']}\n📍 {hackathon['location']}\n💰 {hackathon['prize']}\n📝 {hackathon['description'][:100]}...",
+            value=f"📅 {hackathon['date']}\n📍 {hackathon['location']}\n📝 {hackathon['description'][:100]}...",
             inline=False
         )
     
@@ -94,9 +94,13 @@ async def find_team(interaction: discord.Interaction):
     
     for i, (user_id, compatibility_score) in enumerate(compatible_users[:5], 1):
         user_data = data[user_id]
+        # Add error handling for missing keys
+        roles = user_data.get('roles', [])
+        tech_skills = user_data.get('tech_skills', [])
+        
         embed.add_field(
-            name=f"{i}. {user_data['username']} (Score: {compatibility_score:.1f})",
-            value=f"Roles: {', '.join(user_data['roles']).title()}\nSkills: {', '.join(user_data['tech_skills'][:3])}",
+            name=f"{i}. {user_data.get('username', 'Unknown User')} (Score: {compatibility_score:.1f})",
+            value=f"Roles: {', '.join(roles).title() if roles else 'Not specified'}\nSkills: {', '.join(tech_skills[:3]) if tech_skills else 'Not specified'}",
             inline=False
         )
     
@@ -147,15 +151,19 @@ async def pick_hackathon(interaction: discord.Interaction, hackathon_id: int, lo
         color=EMBED_COLORS["success"]
     )
     
-    embed.add_field(name="Hackathon Details", value=f"📅 {hackathon['date']}\n📍 {hackathon['location']}\n💰 {hackathon['prize']}", inline=False)
+    embed.add_field(name="Hackathon Details", value=f"📅 {hackathon['date']}\n📍 {hackathon['location']}", inline=False)
     
     if compatible_users:
         embed.add_field(name="🤝 Compatible Team Members", value="", inline=False)
         for i, (user_id, compatibility_score) in enumerate(compatible_users[:3], 1):
             user_data = data[user_id]
+            # Add error handling for missing keys
+            roles = user_data.get('roles', [])
+            tech_skills = user_data.get('tech_skills', [])
+            
             embed.add_field(
-                name=f"{i}. {user_data['username']} (Score: {compatibility_score:.1f})",
-                value=f"Roles: {', '.join(user_data['roles']).title()}\nSkills: {', '.join(user_data['tech_skills'][:3])}",
+                name=f"{i}. {user_data.get('username', 'Unknown User')} (Score: {compatibility_score:.1f})",
+                value=f"Roles: {', '.join(roles).title() if roles else 'Not specified'}\nSkills: {', '.join(tech_skills[:3]) if tech_skills else 'Not specified'}",
                 inline=True
             )
     else:
@@ -219,9 +227,13 @@ async def hackathon_teams(interaction: discord.Interaction, hackathon_id: int):
         for user_id in hackathon["participants"]:
             if user_id in data:
                 user_data = data[user_id]
+                # Add error handling for missing keys
+                roles = user_data.get('roles', [])
+                tech_skills = user_data.get('tech_skills', [])
+                
                 embed.add_field(
-                    name=user_data["username"],
-                    value=f"Roles: {', '.join(user_data['roles']).title()}\nSkills: {', '.join(user_data['tech_skills'][:3])}",
+                    name=user_data.get('username', 'Unknown User'),
+                    value=f"Roles: {', '.join(roles).title() if roles else 'Not specified'}\nSkills: {', '.join(tech_skills[:3]) if tech_skills else 'Not specified'}",
                     inline=True
                 )
     else:

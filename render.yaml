@@ -1,13 +1,10 @@
 services:
   - type: web
     name: hackathon-team-finder-bot
-    env: python
-    buildCommand: |
-      python --version
-      pip install -r requirements.txt
+    env: docker
+    buildCommand: docker build -t hackathon-bot .
     startCommand: python bot.py
     envVars:
       - key: DISCORD_TOKEN
         sync: false
-    plan: free
-    pythonVersion: "3.11.8" 
+    plan: free 

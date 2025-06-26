@@ -9,7 +9,7 @@ from config import EMBED_COLORS
 
 async def create_profile(interaction: discord.Interaction):
     """Create a new user profile - opens the profile creation form"""
-    modal = UserProfileModal()
+    modal = UserProfileModal(user=interaction.user)
     await interaction.response.send_modal(modal)
 
 async def update_profile(interaction: discord.Interaction):
@@ -21,7 +21,7 @@ async def update_profile(interaction: discord.Interaction):
         await interaction.response.send_message("❌ You don't have a profile yet. Use `/create-profile` first.", ephemeral=True)
         return
     
-    modal = UserProfileModal(is_update=True)
+    modal = UserProfileModal(is_update=True, user=interaction.user)
     await interaction.response.send_modal(modal)
 
 async def view_profile(interaction: discord.Interaction):

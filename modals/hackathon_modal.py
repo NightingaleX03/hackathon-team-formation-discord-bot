@@ -36,14 +36,6 @@ class HackathonModal(Modal):
             max_length=100
         )
         
-        # Prize
-        self.prize = TextInput(
-            label="Prize Pool",
-            placeholder="e.g., $50,000 or TBD",
-            required=True,
-            max_length=50
-        )
-        
         # Description
         self.description = TextInput(
             label="Description",
@@ -57,7 +49,6 @@ class HackathonModal(Modal):
         self.add_item(self.name)
         self.add_item(self.date)
         self.add_item(self.location)
-        self.add_item(self.prize)
         self.add_item(self.description)
     
     async def on_submit(self, interaction: discord.Interaction):
@@ -78,7 +69,6 @@ class HackathonModal(Modal):
             "name": self.name.value.strip(),
             "date": self.date.value.strip(),
             "location": self.location.value.strip(),
-            "prize": self.prize.value.strip(),
             "description": self.description.value.strip(),
             "created_by": str(interaction.user.id),
             "created_at": datetime.now().isoformat(),
@@ -101,7 +91,6 @@ class HackathonModal(Modal):
         embed.add_field(name="Name", value=new_hackathon["name"], inline=True)
         embed.add_field(name="Date", value=new_hackathon["date"], inline=True)
         embed.add_field(name="Location", value=new_hackathon["location"], inline=True)
-        embed.add_field(name="Prize", value=new_hackathon["prize"], inline=True)
         embed.add_field(name="Description", value=new_hackathon["description"][:100] + "...", inline=False)
         embed.add_field(name="ID", value=f"#{new_hackathon['id']}", inline=True)
         

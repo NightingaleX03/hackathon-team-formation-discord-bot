@@ -9,16 +9,24 @@ from config import USER_ROLES, TECH_SKILLS, EXPERIENCE_LEVELS, TIMEZONES
 from datetime import datetime
 
 class UserProfileModal(Modal):
-    def __init__(self, is_update=False):
+    def __init__(self, is_update=False, user=None):
         super().__init__(title="Create Your Developer Profile" if not is_update else "Update Your Profile")
         self.is_update = is_update
+        self.user = user
         
-        # Username field
+        # Auto-populate username with Discord display name or username
+        default_username = ""
+        if user:
+            # Use display name if available, otherwise use username
+            default_username = user.display_name if user.display_name else user.name
+        
+        # Username field - pre-filled with Discord username
         self.username = TextInput(
             label="Username",
             placeholder="Enter your preferred username",
             required=True,
-            max_length=32
+            max_length=32,
+            default=default_username
         )
         
         # Roles selection

@@ -8,8 +8,6 @@ import os
 from dotenv import load_dotenv
 from config import BOT_TOKEN, BOT_STATUS
 from discord.ext import commands
-from utils.data_manager import load_data, save_data, load_hackathons, save_hackathons
-from utils.matching import find_teammates
 from utils.permissions import check_permissions
 from modals.user_profile_modal import UserProfileModal
 from modals.hackathon_modal import HackathonModal
@@ -21,9 +19,9 @@ import threading
 from commands.profile_commands import create_profile, update_profile, view_profile
 from commands.hackathon_commands import (
     add_hackathon, list_hackathons, remove_hackathon, 
-    find_team, pick_hackathon, remove_from_hackathon, hackathon_teams
+    find_team, pick_hackathon, remove_from_hackathon
 )
-from commands.info_commands import stats
+from commands.info_commands import server_stats
 
 # Load environment variables from .env file (if it exists and is readable)
 try:
@@ -84,14 +82,9 @@ async def pick_hackathon_command(interaction: discord.Interaction, hackathon_id:
 async def remove_from_hackathon_command(interaction: discord.Interaction, hackathon_id: int):
     await remove_from_hackathon(interaction, hackathon_id)
 
-@tree.command(name="hackathon-teams", description="View all participants in a hackathon")
-@app_commands.describe(hackathon_id="The ID of the hackathon")
-async def hackathon_teams_command(interaction: discord.Interaction, hackathon_id: int):
-    await hackathon_teams(interaction, hackathon_id)
-
-@tree.command(name="stats", description="View bot statistics")
+@tree.command(name="stats", description="View server statistics")
 async def stats_command(interaction: discord.Interaction):
-    await stats(interaction)
+    await server_stats(interaction)
 
 @bot.event
 async def on_ready():

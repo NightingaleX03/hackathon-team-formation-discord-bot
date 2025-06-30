@@ -4,8 +4,7 @@ Hackathon Modal for creating new hackathons
 
 import discord
 from discord.ui import Modal, TextInput
-from utils.data_manager import load_data
-import json
+from utils.data_manager import save_single_hackathon, get_all_hackathons
 from datetime import datetime
 
 class HackathonModal(Modal):
@@ -28,14 +27,6 @@ class HackathonModal(Modal):
             max_length=50
         )
         
-        # Location
-        self.location = TextInput(
-            label="Location",
-            placeholder="e.g., San Francisco, CA or Virtual",
-            required=True,
-            max_length=100
-        )
-        
         # Description
         self.description = TextInput(
             label="Description",
@@ -48,39 +39,30 @@ class HackathonModal(Modal):
         # Add all fields to the modal
         self.add_item(self.name)
         self.add_item(self.date)
-        self.add_item(self.location)
         self.add_item(self.description)
     
     async def on_submit(self, interaction: discord.Interaction):
         """Handle the form submission"""
-        # Load existing hackathons
-        try:
-            with open("example_hackathons.json", "r") as f:
-                hackathons = json.load(f)
-        except FileNotFoundError:
-            hackathons = []
-        
-        # Generate new ID
-        new_id = max([h["id"] for h in hackathons], default=0) + 1
+        # Get existing hackathons to generate new ID
+        existing_hackathons = get_all_hackathons()
+        new_id = max([h["id"] for h in existing_hackathons], default=0) + 1
         
         # Create new hackathon
         new_hackathon = {
-            "id": new_id,
             "name": self.name.value.strip(),
             "date": self.date.value.strip(),
-            "location": self.location.value.strip(),
             "description": self.description.value.strip(),
-            "created_by": str(interaction.user.id),
+            "teams": [],
             "created_at": datetime.now().isoformat(),
-            "participants": []
+            "updated_at": datetime.now().isoformat()
         }
         
-        # Add to hackathons list
-        hackathons.append(new_hackathon)
+        # Save to database
+        success = save_single_hackathon(new_hackathon)
         
-        # Save to file
-        with open("example_hackathons.json", "w") as f:
-            json.dump(hackathons, f, indent=2)
+        if not success:
+            await interaction.response.send_message("❌ Failed to create hackathon. Please try again.", ephemeral=True)
+            return
         
         # Create success embed
         embed = discord.Embed(
@@ -90,9 +72,8 @@ class HackathonModal(Modal):
         
         embed.add_field(name="Name", value=new_hackathon["name"], inline=True)
         embed.add_field(name="Date", value=new_hackathon["date"], inline=True)
-        embed.add_field(name="Location", value=new_hackathon["location"], inline=True)
         embed.add_field(name="Description", value=new_hackathon["description"][:100] + "...", inline=False)
-        embed.add_field(name="ID", value=f"#{new_hackathon['id']}", inline=True)
+        embed.add_field(name="ID", value=f"#{new_id}", inline=True)
         
         embed.set_footer(text="Users can now join this hackathon using /pick-hackathon")
         

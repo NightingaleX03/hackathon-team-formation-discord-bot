@@ -5,11 +5,14 @@ Hackathon-related commands for the Hackathon Team Finder Discord Bot
 import discord
 from datetime import datetime
 from modals.hackathon_modal import HackathonModal
-from utils.data_manager import load_data, load_hackathons, save_hackathons
+from utils.data_manager import (
+    get_user_by_id, get_all_users, get_all_hackathons, 
+    save_single_hackathon, delete_hackathon_by_id,
+    join_hackathon, leave_hackathon
+)
 from utils.permissions import is_admin
 from utils.matching import find_compatible_teammates
 from config import EMBED_COLORS, USER_ROLES
-import json
 
 async def add_hackathon(interaction: discord.Interaction):
     """Add a new hackathon - admin only, opens the hackathon creation form"""
@@ -22,12 +25,7 @@ async def add_hackathon(interaction: discord.Interaction):
 
 async def list_hackathons(interaction: discord.Interaction):
     """List all available hackathons - show them in a nice embed"""
-    try:
-        with open("example_hackathons.json", "r") as f:
-            hackathons = json.load(f)
-    except FileNotFoundError:
-        await interaction.response.send_message("❌ No hackathons found.", ephemeral=True)
-        return
+    hackathons = get_all_hackathons()
     
     if not hackathons:
         await interaction.response.send_message("❌ No hackathons available.", ephemeral=True)
@@ -40,9 +38,10 @@ async def list_hackathons(interaction: discord.Interaction):
     )
     
     for hackathon in hackathons:
+        teams_count = len(hackathon.get('teams', []))
         embed.add_field(
             name=f"#{hackathon['id']} - {hackathon['name']}",
-            value=f"📅 {hackathon['date']}\n📍 {hackathon['location']}\n📝 {hackathon['description'][:100]}...",
+            value=f"📅 {hackathon.get('date', 'TBD')}\n👥 {teams_count} participants\n📝 {hackathon.get('description', 'No description')[:100]}...",
             inline=False
         )
     
@@ -54,32 +53,27 @@ async def remove_hackathon(interaction: discord.Interaction, hackathon_id: int):
         await interaction.response.send_message("❌ You need admin permissions to remove hackathons.", ephemeral=True)
         return
     
-    try:
-        with open("example_hackathons.json", "r") as f:
-            hackathons = json.load(f)
-    except FileNotFoundError:
-        await interaction.response.send_message("❌ No hackathons found.", ephemeral=True)
-        return
+    success = delete_hackathon_by_id(hackathon_id)
     
-    # Find and remove the hackathon
-    hackathons = [h for h in hackathons if h["id"] != hackathon_id]
-    
-    with open("example_hackathons.json", "w") as f:
-        json.dump(hackathons, f, indent=2)
-    
-    await interaction.response.send_message(f"✅ Hackathon #{hackathon_id} has been removed.", ephemeral=True)
+    if success:
+        await interaction.response.send_message(f"✅ Hackathon #{hackathon_id} has been removed.", ephemeral=True)
+    else:
+        await interaction.response.send_message(f"❌ Hackathon #{hackathon_id} not found.", ephemeral=True)
 
 async def find_team(interaction: discord.Interaction):
     """Find team members for a hackathon - show compatible users"""
     user_id = str(interaction.user.id)
-    data = load_data()
+    user_profile = get_user_by_id(user_id)
     
-    if user_id not in data:
+    if not user_profile:
         await interaction.response.send_message("❌ You need to create a profile first. Use `/create-profile`.", ephemeral=True)
         return
     
-    user_profile = data[user_id]
-    compatible_users = find_compatible_teammates(user_profile, data)
+    all_users = get_all_users()
+    # Convert to dict format for compatibility
+    users_dict = {user['user_id']: user for user in all_users}
+    
+    compatible_users = find_compatible_teammates(user_profile, users_dict)
     
     if not compatible_users:
         await interaction.response.send_message("❌ No compatible team members found.", ephemeral=True)
@@ -93,7 +87,7 @@ async def find_team(interaction: discord.Interaction):
     )
     
     for i, (user_id, compatibility_score) in enumerate(compatible_users[:5], 1):
-        user_data = data[user_id]
+        user_data = users_dict[user_id]
         # Add error handling for missing keys
         roles = user_data.get('roles', [])
         tech_skills = user_data.get('tech_skills', [])
@@ -109,19 +103,14 @@ async def find_team(interaction: discord.Interaction):
 async def pick_hackathon(interaction: discord.Interaction, hackathon_id: int, looking_for: str):
     """Pick a hackathon and find team members for it"""
     user_id = str(interaction.user.id)
-    data = load_data()
+    user_profile = get_user_by_id(user_id)
     
-    if user_id not in data:
+    if not user_profile:
         await interaction.response.send_message("❌ You need to create a profile first. Use `/create-profile`.", ephemeral=True)
         return
     
-    # Load hackathons
-    try:
-        with open("example_hackathons.json", "r") as f:
-            hackathons = json.load(f)
-    except FileNotFoundError:
-        await interaction.response.send_message("❌ No hackathons found.", ephemeral=True)
-        return
+    # Get hackathons from database
+    hackathons = get_all_hackathons()
     
     # Find the specific hackathon
     hackathon = next((h for h in hackathons if h["id"] == hackathon_id), None)
@@ -129,20 +118,17 @@ async def pick_hackathon(interaction: discord.Interaction, hackathon_id: int, lo
         await interaction.response.send_message(f"❌ Hackathon #{hackathon_id} not found.", ephemeral=True)
         return
     
-    # Add user to hackathon participants
-    if "participants" not in hackathon:
-        hackathon["participants"] = []
+    # Add user to hackathon
+    success = join_hackathon(hackathon_id, user_id, user_profile['username'])
     
-    if user_id not in hackathon["participants"]:
-        hackathon["participants"].append(user_id)
-    
-    # Save updated hackathon data
-    with open("example_hackathons.json", "w") as f:
-        json.dump(hackathons, f, indent=2)
+    if not success:
+        await interaction.response.send_message(f"❌ You're already participating in {hackathon['name']}.", ephemeral=True)
+        return
     
     # Find compatible team members
-    user_profile = data[user_id]
-    compatible_users = find_compatible_teammates(user_profile, data)
+    all_users = get_all_users()
+    users_dict = {user['user_id']: user for user in all_users}
+    compatible_users = find_compatible_teammates(user_profile, users_dict)
     
     # Build the response embed
     embed = discord.Embed(
@@ -151,12 +137,13 @@ async def pick_hackathon(interaction: discord.Interaction, hackathon_id: int, lo
         color=EMBED_COLORS["success"]
     )
     
-    embed.add_field(name="Hackathon Details", value=f"📅 {hackathon['date']}\n📍 {hackathon['location']}", inline=False)
+    teams_count = len(hackathon.get('teams', []))
+    embed.add_field(name="Hackathon Details", value=f"📅 {hackathon.get('date', 'TBD')}\n👥 {teams_count} participants", inline=False)
     
     if compatible_users:
         embed.add_field(name="🤝 Compatible Team Members", value="", inline=False)
         for i, (user_id, compatibility_score) in enumerate(compatible_users[:3], 1):
-            user_data = data[user_id]
+            user_data = users_dict[user_id]
             # Add error handling for missing keys
             roles = user_data.get('roles', [])
             tech_skills = user_data.get('tech_skills', [])
@@ -175,68 +162,9 @@ async def remove_from_hackathon(interaction: discord.Interaction, hackathon_id: 
     """Remove user from a hackathon"""
     user_id = str(interaction.user.id)
     
-    try:
-        with open("example_hackathons.json", "r") as f:
-            hackathons = json.load(f)
-    except FileNotFoundError:
-        await interaction.response.send_message("❌ No hackathons found.", ephemeral=True)
-        return
+    success = leave_hackathon(hackathon_id, user_id)
     
-    # Find the hackathon
-    hackathon = next((h for h in hackathons if h["id"] == hackathon_id), None)
-    if not hackathon:
-        await interaction.response.send_message(f"❌ Hackathon #{hackathon_id} not found.", ephemeral=True)
-        return
-    
-    # Remove user from participants
-    if "participants" in hackathon and user_id in hackathon["participants"]:
-        hackathon["participants"].remove(user_id)
-        
-        with open("example_hackathons.json", "w") as f:
-            json.dump(hackathons, f, indent=2)
-        
-        await interaction.response.send_message(f"✅ You've been removed from {hackathon['name']}.", ephemeral=True)
+    if success:
+        await interaction.response.send_message(f"✅ You've been removed from hackathon #{hackathon_id}.", ephemeral=True)
     else:
-        await interaction.response.send_message(f"❌ You're not participating in {hackathon['name']}.", ephemeral=True)
-
-async def hackathon_teams(interaction: discord.Interaction, hackathon_id: int):
-    """View all participants in a hackathon"""
-    try:
-        with open("example_hackathons.json", "r") as f:
-            hackathons = json.load(f)
-    except FileNotFoundError:
-        await interaction.response.send_message("❌ No hackathons found.", ephemeral=True)
-        return
-    
-    # Find the hackathon
-    hackathon = next((h for h in hackathons if h["id"] == hackathon_id), None)
-    if not hackathon:
-        await interaction.response.send_message(f"❌ Hackathon #{hackathon_id} not found.", ephemeral=True)
-        return
-    
-    # Load user data
-    data = load_data()
-    
-    # Build the teams embed
-    embed = discord.Embed(
-        title=f"👥 {hackathon['name']} - Participants",
-        color=EMBED_COLORS["info"]
-    )
-    
-    if "participants" in hackathon and hackathon["participants"]:
-        for user_id in hackathon["participants"]:
-            if user_id in data:
-                user_data = data[user_id]
-                # Add error handling for missing keys
-                roles = user_data.get('roles', [])
-                tech_skills = user_data.get('tech_skills', [])
-                
-                embed.add_field(
-                    name=user_data.get('username', 'Unknown User'),
-                    value=f"Roles: {', '.join(roles).title() if roles else 'Not specified'}\nSkills: {', '.join(tech_skills[:3]) if tech_skills else 'Not specified'}",
-                    inline=True
-                )
-    else:
-        embed.add_field(name="No Participants", value="No one has joined this hackathon yet.", inline=False)
-    
-    await interaction.response.send_message(embed=embed, ephemeral=True) 
+        await interaction.response.send_message(f"❌ You're not participating in hackathon #{hackathon_id}.", ephemeral=True) 

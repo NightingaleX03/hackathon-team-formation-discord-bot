@@ -1,59 +1,48 @@
 """
-Information and utility commands for the Hackathon Team Finder Discord Bot
+Info-related commands for the Hackathon Team Finder Discord Bot
 """
 
 import discord
-from utils.data_manager import load_data
+from utils.data_manager import get_all_users
 from config import EMBED_COLORS
 
-async def stats(interaction: discord.Interaction):
-    """Show bot statistics - user count, hackathon count, etc."""
-    data = load_data()
+async def server_stats(interaction: discord.Interaction):
+    """Show server statistics - total users, active profiles, etc."""
+    users = get_all_users()
     
-    # Calculate statistics
-    total_users = len(data)
-    total_profiles = sum(1 for user in data.values() if user.get("username"))
+    total_users = len(users)
+    active_profiles = len([u for u in users if u.get('looking_for_team', True)])
     
-    # Count roles and skills
-    all_roles = []
-    all_skills = []
-    
-    for user in data.values():
-        if "roles" in user:
-            all_roles.extend(user["roles"])
-        if "tech_skills" in user:
-            all_skills.extend(user["tech_skills"])
-    
-    # Get most common roles and skills
+    # Count roles
     role_counts = {}
-    for role in all_roles:
-        role_counts[role] = role_counts.get(role, 0) + 1
+    for user in users:
+        for role in user.get('roles', []):
+            role_counts[role] = role_counts.get(role, 0) + 1
     
-    skill_counts = {}
-    for skill in all_skills:
-        skill_counts[skill] = skill_counts.get(skill, 0) + 1
+    # Count experience levels
+    experience_counts = {}
+    for user in users:
+        exp = user.get('experience', 'unknown')
+        experience_counts[exp] = experience_counts.get(exp, 0) + 1
     
-    top_roles = sorted(role_counts.items(), key=lambda x: x[1], reverse=True)[:3]
-    top_skills = sorted(skill_counts.items(), key=lambda x: x[1], reverse=True)[:3]
-    
-    # Build the stats embed
     embed = discord.Embed(
-        title="📊 Bot Statistics",
+        title="📊 Server Statistics",
         color=EMBED_COLORS["info"]
     )
     
-    embed.add_field(name="👥 Total Users", value=str(total_users), inline=True)
-    embed.add_field(name="📝 Profiles Created", value=str(total_profiles), inline=True)
-    embed.add_field(name="🏆 Active Hackathons", value="3", inline=True)
+    embed.add_field(name="Total Users", value=total_users, inline=True)
+    embed.add_field(name="Active Profiles", value=active_profiles, inline=True)
+    embed.add_field(name="Looking for Team", value=active_profiles, inline=True)
     
-    if top_roles:
+    # Top roles
+    if role_counts:
+        top_roles = sorted(role_counts.items(), key=lambda x: x[1], reverse=True)[:3]
         roles_text = "\n".join([f"• {role.title()}: {count}" for role, count in top_roles])
-        embed.add_field(name="🎭 Top Roles", value=roles_text, inline=True)
+        embed.add_field(name="Top Roles", value=roles_text, inline=True)
     
-    if top_skills:
-        skills_text = "\n".join([f"• {skill.title()}: {count}" for skill, count in top_skills])
-        embed.add_field(name="💻 Top Skills", value=skills_text, inline=True)
-    
-    embed.set_footer(text="Keep building amazing teams! 🚀")
+    # Experience distribution
+    if experience_counts:
+        exp_text = "\n".join([f"• {exp.title()}: {count}" for exp, count in experience_counts.items()])
+        embed.add_field(name="Experience Levels", value=exp_text, inline=True)
     
     await interaction.response.send_message(embed=embed, ephemeral=True) 

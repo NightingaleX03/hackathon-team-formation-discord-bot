@@ -4,7 +4,7 @@ Profile-related commands for the Hackathon Team Finder Discord Bot
 
 import discord
 from modals.user_profile_modal import UserProfileModal
-from utils.data_manager import load_data
+from utils.data_manager import get_user_by_id, get_all_users
 from config import EMBED_COLORS
 
 async def create_profile(interaction: discord.Interaction):
@@ -15,9 +15,9 @@ async def create_profile(interaction: discord.Interaction):
 async def update_profile(interaction: discord.Interaction):
     """Update existing user profile - check if profile exists first"""
     user_id = str(interaction.user.id)
-    data = load_data()
+    profile = get_user_by_id(user_id)
     
-    if user_id not in data:
+    if not profile:
         await interaction.response.send_message("❌ You don't have a profile yet. Use `/create-profile` first.", ephemeral=True)
         return
     
@@ -27,13 +27,11 @@ async def update_profile(interaction: discord.Interaction):
 async def view_profile(interaction: discord.Interaction):
     """View user profile - show all the profile details in a nice embed"""
     user_id = str(interaction.user.id)
-    data = load_data()
+    profile = get_user_by_id(user_id)
     
-    if user_id not in data:
+    if not profile:
         await interaction.response.send_message("❌ You don't have a profile yet. Use `/create-profile` first.", ephemeral=True)
         return
-    
-    profile = data[user_id]
     
     # Build the profile display embed - show all the important info
     embed = discord.Embed(
@@ -45,7 +43,7 @@ async def view_profile(interaction: discord.Interaction):
     embed.add_field(name="Experience", value=profile["experience"].title(), inline=True)
     embed.add_field(name="Timezone", value=profile["timezone"], inline=True)
     embed.add_field(name="Tech Skills", value=", ".join(profile["tech_skills"]), inline=False)
-    embed.add_field(name="Created", value=profile["created_at"][:10], inline=True)
-    embed.add_field(name="Updated", value=profile["updated_at"][:10], inline=True)
+    embed.add_field(name="Created", value=profile["created_at"][:10] if profile["created_at"] else "Unknown", inline=True)
+    embed.add_field(name="Updated", value=profile["updated_at"][:10] if profile["updated_at"] else "Unknown", inline=True)
     
     await interaction.response.send_message(embed=embed, ephemeral=True) 

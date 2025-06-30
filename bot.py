@@ -7,6 +7,15 @@ from discord import app_commands
 import os
 from dotenv import load_dotenv
 from config import BOT_TOKEN, BOT_STATUS
+from discord.ext import commands
+from utils.data_manager import load_data, save_data, load_hackathons, save_hackathons
+from utils.matching import find_teammates
+from utils.permissions import check_permissions
+from modals.user_profile_modal import UserProfileModal
+from modals.hackathon_modal import HackathonModal
+import asyncio
+from flask import Flask
+import threading
 
 # Import commands from organized modules
 from commands.profile_commands import create_profile, update_profile, view_profile
@@ -97,6 +106,20 @@ async def on_ready():
     # Sync commands
     await tree.sync()
     print("✅ Commands synced!")
+
+# Create Flask app for health check
+app = Flask(__name__)
+
+@app.route('/')
+def health_check():
+    return "Bot is running!", 200
+
+def run_flask():
+    app.run(host='0.0.0.0', port=8000)
+
+# Start Flask in a separate thread
+flask_thread = threading.Thread(target=run_flask, daemon=True)
+flask_thread.start()
 
 # Run the bot
 if __name__ == "__main__":

@@ -1,8 +1,8 @@
 services:
   - type: worker
     name: hackathon-team-finder-bot
-    env: docker
-    buildCommand: docker build -t hackathon-bot .
+    env: python
+    buildCommand: pip install -r requirements.txt
     startCommand: python bot.py
     envVars:
       - key: DISCORD_TOKEN

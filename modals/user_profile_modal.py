@@ -1,9 +1,9 @@
 """
-User Profile Modal for creating and updating user profiles with dropdown menus
+User Profile Modal for creating and updating user profiles
 """
 
 import discord
-from discord.ui import Modal, TextInput, Select
+from discord.ui import Modal, TextInput
 from utils.data_manager import save_user, get_user_by_id
 from config import USER_ROLES, TECH_SKILLS, EXPERIENCE_LEVELS, TIMEZONES
 from datetime import datetime
@@ -29,27 +29,55 @@ class UserProfileModal(Modal):
             default=default_username
         )
         
+        # Roles field - comma-separated
+        self.roles = TextInput(
+            label="Roles (comma-separated)",
+            placeholder="e.g., frontend, backend, ai/ml, designer",
+            required=True,
+            max_length=200
+        )
+        
+        # Experience level
+        self.experience = TextInput(
+            label="Experience Level",
+            placeholder="e.g., beginner, intermediate, advanced, expert",
+            required=True,
+            max_length=20
+        )
+        
+        # Timezone
+        self.timezone = TextInput(
+            label="Timezone",
+            placeholder="e.g., UTC, EST, PST, GMT",
+            required=True,
+            max_length=10
+        )
+        
+        # Tech skills
+        self.tech_skills = TextInput(
+            label="Tech Skills (comma-separated)",
+            placeholder="e.g., python, javascript, react, aws, docker",
+            required=True,
+            max_length=500
+        )
+        
         # Add all fields to the modal
         self.add_item(self.username)
-        
-        # Add dropdown selects
-        self.add_item(RolesSelect())
-        self.add_item(ExperienceSelect())
-        self.add_item(TimezoneSelect())
-        self.add_item(TechSkillsSelect())
+        self.add_item(self.roles)
+        self.add_item(self.experience)
+        self.add_item(self.timezone)
+        self.add_item(self.tech_skills)
     
     async def on_submit(self, interaction: discord.Interaction):
         """Handle the form submission"""
         user_id = str(interaction.user.id)
         
-        # Get values from the modal
+        # Parse the input data
         username = self.username.value.strip()
-        
-        # Get values from the select components
-        roles = getattr(self, 'selected_roles', [])
-        experience = getattr(self, 'selected_experience', '')
-        timezone = getattr(self, 'selected_timezone', '')
-        tech_skills = getattr(self, 'selected_tech_skills', [])
+        roles = [role.strip().lower() for role in self.roles.value.split(",") if role.strip()]
+        experience = self.experience.value.strip().lower()
+        timezone = self.timezone.value.strip().upper()
+        tech_skills = [skill.strip().lower() for skill in self.tech_skills.value.split(",") if skill.strip()]
         
         # Validate input
         if not username or not roles or not experience or not timezone or not tech_skills:
@@ -93,76 +121,4 @@ class UserProfileModal(Modal):
         action = "updated" if self.is_update else "created"
         embed.set_footer(text=f"Your profile has been {action}! Use /find-team to start matching.")
         
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
-class RolesSelect(Select):
-    def __init__(self):
-        options = [
-            discord.SelectOption(label=role.title(), value=role, description=f"Select {role} role")
-            for role in USER_ROLES
-        ]
-        super().__init__(
-            placeholder="Select your roles (multiple allowed)",
-            min_values=1,
-            max_values=len(USER_ROLES),
-            options=options,
-            custom_id="roles_select"
-        )
-    
-    async def callback(self, interaction: discord.Interaction):
-        self.view.selected_roles = self.values
-        await interaction.response.defer()
-
-class ExperienceSelect(Select):
-    def __init__(self):
-        options = [
-            discord.SelectOption(label=level.title(), value=level, description=f"{level} experience level")
-            for level in EXPERIENCE_LEVELS
-        ]
-        super().__init__(
-            placeholder="Select your experience level",
-            min_values=1,
-            max_values=1,
-            options=options,
-            custom_id="experience_select"
-        )
-    
-    async def callback(self, interaction: discord.Interaction):
-        self.view.selected_experience = self.values[0]
-        await interaction.response.defer()
-
-class TimezoneSelect(Select):
-    def __init__(self):
-        options = [
-            discord.SelectOption(label=tz, value=tz, description=f"Timezone: {tz}")
-            for tz in TIMEZONES
-        ]
-        super().__init__(
-            placeholder="Select your timezone",
-            min_values=1,
-            max_values=1,
-            options=options,
-            custom_id="timezone_select"
-        )
-    
-    async def callback(self, interaction: discord.Interaction):
-        self.view.selected_timezone = self.values[0]
-        await interaction.response.defer()
-
-class TechSkillsSelect(Select):
-    def __init__(self):
-        options = [
-            discord.SelectOption(label=skill.title(), value=skill, description=f"Select {skill} skill")
-            for skill in TECH_SKILLS
-        ]
-        super().__init__(
-            placeholder="Select your tech skills (multiple allowed)",
-            min_values=1,
-            max_values=min(10, len(TECH_SKILLS)),  # Limit to 10 skills max
-            options=options,
-            custom_id="tech_skills_select"
-        )
-    
-    async def callback(self, interaction: discord.Interaction):
-        self.view.selected_tech_skills = self.values
-        await interaction.response.defer() 
+        await interaction.response.send_message(embed=embed, ephemeral=True) 

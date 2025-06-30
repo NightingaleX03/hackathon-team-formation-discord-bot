@@ -87,52 +87,6 @@ Once you find team members:
 - Connect with them via Discord
 - Use `/remove-from-hackathon <id>` when your team is formed
 
-## 🔧 Setup
-
-### Prerequisites
-- Python 3.8 or higher
-- Discord Bot Token
-- Discord Server with admin permissions
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd discord-bot
-   ```
-
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Create a Discord Bot**
-   - Go to [Discord Developer Portal](https://discord.com/developers/applications)
-   - Create a new application
-   - Go to the "Bot" section
-   - Create a bot and copy the token
-
-4. **Set up environment variables**
-   Create a `.env` file in the project root:
-   ```
-   DISCORD_TOKEN=your_bot_token_here
-   ```
-
-5. **Invite the bot to your server**
-   - Go to OAuth2 > URL Generator
-   - Select "bot" scope
-   - Select required permissions:
-     - Send Messages
-     - Use Slash Commands
-     - Read Message History
-     - Mention Everyone (for pinging matched users)
-   - Use the generated URL to invite the bot
-
-6. **Run the bot**
-   ```bash
-   python bot.py
-   ```
 
 ## 📊 Available Roles
 
@@ -202,30 +156,6 @@ discord-bot/
 
 The bot is organized into logical modules for better maintainability:
 
-### **Utils** (`utils/`)
-- **`data_manager.py`**: Handles all JSON file operations for user data and hackathons
-- **`matching.py`**: Contains the matching algorithm and compatibility scoring
-- **`permissions.py`**: Admin permission checks
-
-### **Modals** (`modals/`)
-- **`user_profile_modal.py`**: Discord modal for creating/updating user profiles
-- **`hackathon_modal.py`**: Discord modal for adding new hackathons
-
-### **Commands** (`commands/`)
-- **`profile_commands.py`**: All profile-related slash commands
-- **`hackathon_commands.py`**: All hackathon-related slash commands
-- **`info_commands.py`**: Information and utility commands
-
-### **Main Files**
-- **`bot.py`**: Main bot file that imports and registers all commands
-- **`config.py`**: All configuration constants and settings
-
-## 🔒 Permissions
-
-- **Admin Commands**: Only server administrators can add/remove hackathons
-- **User Commands**: Any user can create profiles and find teams
-- **Data Privacy**: All data is stored locally in JSON files
-
 ## 🤝 Contributing
 
 Feel free to contribute to this project by:
@@ -245,7 +175,3 @@ If you encounter any issues or have questions:
 2. Ensure you have the correct permissions
 3. Verify your Discord bot token is correct
 4. Check that the bot has been invited with the right permissions
-
----
-
-**Happy Hacking! 🚀** 

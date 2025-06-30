@@ -9,4 +9,5 @@ services:
         sync: false
       - key: DATABASE_URL
         sync: false
-    plan: free 
+    plan: free
+    pythonVersion: "3.11" 

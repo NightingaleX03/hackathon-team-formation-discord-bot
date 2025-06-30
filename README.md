@@ -175,3 +175,5 @@ If you encounter any issues or have questions:
 2. Ensure you have the correct permissions
 3. Verify your Discord bot token is correct
 4. Check that the bot has been invited with the right permissions
+
+Thank you <3

@@ -8,7 +8,7 @@ import os
 from dotenv import load_dotenv
 from config import BOT_TOKEN, BOT_STATUS
 from discord.ext import commands
-from utils.permissions import check_permissions
+from utils.permissions import is_admin
 from modals.user_profile_modal import UserProfileModal
 from modals.hackathon_modal import HackathonModal
 import asyncio

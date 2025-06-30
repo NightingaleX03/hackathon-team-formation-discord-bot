@@ -10,4 +10,5 @@ services:
       - key: DATABASE_URL
         sync: false
     plan: free
-    pythonVersion: "3.11" 
+    pythonVersion: "3.11"
+    autoDeploy: true 

@@ -1,5 +1,5 @@
 services:
-  - type: web
+  - type: worker
     name: hackathon-team-finder-bot
     env: docker
     buildCommand: docker build -t hackathon-bot .
